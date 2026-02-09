@@ -39,7 +39,10 @@ try {
 // Returns both the highest in the given range and the actual `latest` tag
 // Note that this differs in that the return value is an object
 try {
-  const versions = await getLatestVersion('@sanity/base', {range: '^1.0.0', includeLatest: true})
+  const versions = await getLatestVersion('@sanity/base', {
+    range: '^1.0.0',
+    includeLatest: true,
+  })
   console.log(versions) // {inRange: '1.150.8', latest: '2.23.0'}
 } catch (err) {
   console.error(err)
@@ -70,7 +73,7 @@ import {getLatestVersion} from 'get-latest-version'
 
 try {
   const version = await getLatestVersion('some-module', {
-    registryUrl: 'https://some-custom-registry.com'
+    registryUrl: 'https://some-custom-registry.com',
   })
   console.log(version)
 } catch (err) {
