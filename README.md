@@ -39,7 +39,10 @@ try {
 // Returns both the highest in the given range and the actual `latest` tag
 // Note that this differs in that the return value is an object
 try {
-  const versions = await getLatestVersion('@sanity/base', {range: '^1.0.0', includeLatest: true})
+  const versions = await getLatestVersion('@sanity/base', {
+    range: '^1.0.0',
+    includeLatest: true,
+  })
   console.log(versions) // {inRange: '1.150.8', latest: '2.23.0'}
 } catch (err) {
   console.error(err)
@@ -70,13 +73,63 @@ import {getLatestVersion} from 'get-latest-version'
 
 try {
   const version = await getLatestVersion('some-module', {
-    registryUrl: 'https://some-custom-registry.com'
+    registryUrl: 'https://some-custom-registry.com',
   })
   console.log(version)
 } catch (err) {
   console.error(err)
 }
 ```
+
+## Canceling requests with AbortSignal
+
+You can cancel in-flight requests using an `AbortController`. This is useful for implementing timeouts, canceling requests.
+
+```js
+import {getLatestVersion} from 'get-latest-version'
+
+// Cancel a request with a timeout
+const controller = new AbortController()
+const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+try {
+  const version = await getLatestVersion('some-module', {signal: controller.signal})
+  clearTimeout(timeoutId)
+  console.log(version)
+} catch (err) {
+  if (err.name === 'AbortError') {
+    console.log('Request was canceled')
+  } else {
+    console.error(err)
+  }
+}
+```
+
+**Note:** Aborted requests are not retried, ensuring immediate cancellation.
+
+## Advanced Options
+
+### Custom Request Function (for testing)
+
+The `request` option allows you to provide a custom HTTP request function for testing purposes:
+
+```js
+import {getLatestVersion} from 'get-latest-version'
+
+// Mock request function for testing
+const mockRequest = async ({url}) => ({
+  body: {
+    'dist-tags': {latest: '1.0.0'},
+    versions: {'1.0.0': {}},
+  },
+  statusCode: 200,
+})
+
+const version = await getLatestVersion('lodash', {request: mockRequest})
+// => '1.0.0'
+```
+
+**Note:** This is an advanced option primarily intended for testing. The default HTTP client handles retries, error handling, and proper response parsing.
 
 ## Developing
 
